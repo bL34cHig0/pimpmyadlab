@@ -148,11 +148,11 @@ function fix_setspn {
   $ShortDomainName=((gwmi Win32_ComputerSystem).Domain).Split(".")[0]
   $machine=$env:COMPUTERNAME
   write-host("`n  [++] Deleting Existing SPNs")
-  #setspn -D SQLService/MARVEL.local HYDRA-DC > $null
-  #setspn -D SQLService/Marvel.local MARVEL\SQLService > $null
-  #setspn -D HYDRA-DC/SQLService.MARVEL.local:60111 MARVEL\SQLService > $null
-  #setspn -D MARVEL/SQLService.Marvel.local:60111 MARVEL\SQLService > $null
-  #setspn -D DomainController/SQLService.MARVEL.Local:60111 MARVEL\SQLService > $null
+  #setspn -D SQLService/ZENITHCORE.local ZENITHCORE-DC01 > $null
+  #setspn -D SQLService/ZenithCore.local ZENITHCORE\SQLService > $null
+  #setspn -D ZENITHCORE-DC01/SQLService.ZENITHCORE.local:60111 ZENITHCORE\SQLService > $null
+  #setspn -D ZENITHCORE/SQLService.ZenithCore.local:60111 ZENITHCORE\SQLService > $null
+  #setspn -D DomainController/SQLService.ZENITHCORE.Local:60111 ZENITHCORE\SQLService > $null
  
 #--- new code 
   setspn -D SQLService/$FullDomainName $machine > $null
@@ -163,9 +163,9 @@ function fix_setspn {
 
   # add the new spn
   write-host("`n  [++] Adding SPNs")
-  # setspn -A HYDRA-DC/SQLService.MARVEL.local:60111 MARVEL\SQLService > $null
-  # setspn -A SQLService/MARVEL.local  MARVEL\SQLService > $null
-  # setspn -A DomainController/SQLService.MARVEL.local:60111 MARVEL\SQLService > $null
+  # setspn -A ZENITHCORE-DC01/SQLService.ZENITHCORE.local:60111 ZENITHCORE\SQLService > $null
+  # setspn -A SQLService/ZENITHCORE.local  ZENITHCORE\SQLService > $null
+  # setspn -A DomainController/SQLService.ZENITHCORE.local:60111 ZENITHCORE\SQLService > $null
  
  # -- new code 
  setspn -A $machine/SQLService.$FullDomainName`:60111 $ShortDomainName\SQLService > $null
@@ -174,11 +174,11 @@ function fix_setspn {
 
   # check both local and domain spns (add additional if statements here)
   write-host("`n  [++] Checking Local Hydra-DC SPN")
-  #setspn -L HYDRA-DC
+  #setspn -L ZENITHCORE-DC01
   # -- new code 
   setspn -L $machine 
-  write-host("`n  [++] Checking MARVEL\SQLService SPN")
-  #setspn -L MARVEL\SQLService
+  write-host("`n  [++] Checking ZENITHCORE\SQLService SPN")
+  #setspn -L ZENITHCORE\SQLService
   # -- new code 
   setspn -L $ShortDomainName\SQLService
   }
@@ -225,14 +225,14 @@ function build_lab {
   Import-Module ActiveDirectory -WarningAction SilentlyContinue | Out-Null
 
   # install adds 
-  write-host("`n  [++] Installing ADDS Domain : Marvel.local ")
-  Install-ADDSDomain -SkipPreChecks -ParentDomainName MARVEL -NewDomainName local -NewDomainNetbiosName MARVEL `
+  write-host("`n  [++] Installing ADDS Domain : ZenithCore.local ")
+  Install-ADDSDomain -SkipPreChecks -ParentDomainName ZENITHCORE -NewDomainName local -NewDomainNetbiosName ZENITHCORE `
   -InstallDns -SafeModeAdministratorPassword (Convertto-SecureString -AsPlainText "P@$$w0rd!" -Force) -Force -WarningAction SilentlyContinue | Out-Null
 
-  # create adds forest marvel.local
-  write-host("`n  [++] Deploying Active Directory Domain Forest in MARVEL.local")
+  # create adds forest zenithcore.local
+  write-host("`n  [++] Deploying Active Directory Domain Forest in ZENITHCORE.local")
   Install-ADDSForest -SkipPreChecks -CreateDnsDelegation:$false -DatabasePath "C:\Windows\NTDS" `
-  -DomainMode "WinThreshold" -DomainName "MARVEL.local" -DomainNetbiosName "MARVEL" `
+  -DomainMode "WinThreshold" -DomainName "ZENITHCORE.local" -DomainNetbiosName "ZENITHCORE" `
   -ForestMode "WinThreshold" -InstallDns:$true -LogPath "C:\Windows\NTDS" -NoRebootOnCompletion:$false `
   -SysvolPath "C:\Windows\SYSVOL" -Force:$true `
   -SafeModeAdministratorPassword (Convertto-SecureString -AsPlainText "P@$$w0rd!" -Force) -WarningAction SilentlyContinue | Out-Null
@@ -310,39 +310,39 @@ function create_labcontent {
   #write-host("`n  [++] Setting DNS Server to 127.0.0.1 on interface $adapter")
   #Set-DNSClientServerAddress "$adapter" -ServerAddresses ("127.0.0.1") | Out-Null
 
-  # create user pparker
-  New-ADUser -Name "Peter Parker" -GivenName "Peter" -Surname "Parker" -SamAccountName "pparker" `
-  -UserPrincipalName "pparker@$Global:Domain -Path DC=marvel,DC=local" `
+  # create user sibeh
+  New-ADUser -Name "Samuel Ibeh" -GivenName "Samuel" -Surname "Ibeh"-SamAccountName "sibeh" `
+  -UserPrincipalName "sibeh@$Global:Domain -Path DC=zenithcore,DC=local" `
   -AccountPassword (ConvertTo-SecureString "Password2" -AsPlainText -Force) `
   -PasswordNeverExpires $true -PassThru | Enable-ADAccount  | Out-Null
-  Write-Host "`n  [++] User: Peter Parker added, Logon: pparker Password: Password2"
-  Write-Host "        Adding Peter Parker to Marvel.local Groups: Domain Users"
+  Write-Host "`n  [++] User: Samuel Ibeh added, Logon: sibeh Password: Password2"
+  Write-Host "        Adding Samuel Ibeh to ZenithCore.local Groups: Domain Users"
 
-  # create user fcastle
-  New-ADUser -Name "Frank Castle" -GivenName "Frank" -Surname "Castle" -SamAccountName "fcastle" `
-  -UserPrincipalName "fcastle@$Global:Domain -Path DC=marvel,DC=local" `
+  # create user annaji
+  New-ADUser -Name "Angela Nnaji" -GivenName "Angela"  -Surname "Nnaji"  -SamAccountName "annaji" `
+  -UserPrincipalName "annaji@$Global:Domain -Path DC=zenithcore,DC=local" `
   -AccountPassword (ConvertTo-SecureString "Password1" -AsPlainText -Force) `
   -PasswordNeverExpires $true -PassThru | Enable-ADAccount  | Out-Null
 
-  # if the rps_s_access_denited is fixed by the reg key, fcastle no longer needs to be a domain admin
-  Add-ADGroupMember -Identity "Domain Admins" -Members fcastle  | Out-Null
-  Write-Host "`n  [++] User: Frank Castle added, Logon: fcastle Password: Password1"
-  Write-Host "        Adding Frank Castle to Marvel.local Groups: Domain Users, Domain Admins"
+  # if the rps_s_access_denited is fixed by the reg key, annaji no longer needs to be a domain admin
+  Add-ADGroupMember -Identity "Domain Admins" -Members annaji  | Out-Null
+  Write-Host "`n  [++] User: Angela Nnaji added, Logon: annaji Password: Password1"
+  Write-Host "        Adding Angela Nnaji to ZenithCore.local Groups: Domain Users, Domain Admins"
 
-  # create user tstark 
-  New-ADUser -Name "Tony Stark" -GivenName "Tony" -Surname "Stark" -SamAccountName "tstark" `
-  -UserPrincipalName "tstark@$Global:Domain -Path DC=marvel,DC=local" `
+  # create user nokafor 
+  New-ADUser -Name "Nkechi Okafor" -GivenName "Nkechi" -Surname "Okafor" -SamAccountName "nokafor" `
+  -UserPrincipalName "nokafor@$Global:Domain -Path DC=zenithcore,DC=local" `
   -AccountPassword (ConvertTo-SecureString "Password2019!@#" -AsPlainText -Force) `
   -PasswordNeverExpires $true -PassThru | Enable-ADAccount | Out-Null
 
-  Add-ADGroupMember -Identity "Administrators" -Members tstark
-  Add-ADGroupMember -Identity "Domain Admins" -Members tstark
-  Write-Host "`n  [++] User: Tony Stark added, Logon: tstark Password: Password2019!@#"
-  Write-Host "        Adding Tony Stark to Marvel.local Groups: Administrators, Domain Admins"
+  Add-ADGroupMember -Identity "Administrators" -Members nokafor
+  Add-ADGroupMember -Identity "Domain Admins" -Members nokafor
+  Write-Host "`n  [++] User: Nkechi Okafor added, Logon: nokafor Password: Password2019!@#"
+  Write-Host "        Adding Nkechi Okafor to ZenithCore.local Groups: Administrators, Domain Admins"
 
   # create user sqlservice 
   New-ADUser -Name "SQL Service" -GivenName "SQL" -Surname "Service" -SamAccountName "sqlservice" `
-  -UserPrincipalName "sqlservice@$Global:Domain -Path DC=marvel,DC=local" `
+  -UserPrincipalName "sqlservice@$Global:Domain -Path DC=zenithcore,DC=local" `
   -AccountPassword (ConvertTo-SecureString "MYpassword123#" -AsPlainText -Force) `
   -PasswordNeverExpires $true -Description "Password is MYpassword123#" -PassThru | Enable-ADAccount | Out-Null
 
@@ -352,35 +352,35 @@ function create_labcontent {
   Add-ADGroupMember -Identity "Group Policy Creator Owners" -Members sqlservice | Out-Null
   Add-ADGroupMember -Identity "Schema Admins" -Members sqlservice | Out-Null
   Write-Host "`n  [++] User: SQL Service added, Logon Name: sqlservice Password: MYpassword123#" 
-  Write-Host "        Adding SQLService to Marvel.local Groups: Administrators, Domain Admins, Enterprise Admins, Group Policy Creator Owners, Schema Admins"
+  Write-Host "        Adding SQLService to ZenithCore.local Groups: Administrators, Domain Admins, Enterprise Admins, Group Policy Creator Owners, Schema Admins"
 
   # setspn for sqlservice user
   # this section of the script was moved to its own function to serve 2 purposes 
   # 1 for the adlab build intitally and 2 as a support tool 
   fix_setspn
 
-  # create ou=groups, move all existing groups into ou=groups,dc=marvel,dc=local
-  New-ADOrganizationalUnit -Name "Groups" -Path "DC=MARVEL,DC=LOCAL" -Description "Groups" | Out-Null
-  get-adgroup "Schema Admins" | move-adobject -targetpath "OU=Groups,DC=MARVEL,DC=LOCAL" | Out-Null
-  get-adgroup "Allowed RODC Password Replication Group" | move-adobject -targetpath "OU=Groups,DC=MARVEL,DC=LOCAL" | Out-Null
-  get-adgroup "Cert Publishers" | move-adobject -targetpath "OU=Groups,DC=MARVEL,DC=LOCAL" | Out-Null
-  get-adgroup "Cloneable Domain Controllers" | move-adobject -targetpath "OU=Groups,DC=MARVEL,DC=LOCAL" | Out-Null
-  get-adgroup "Denied RODC Password Replication Group" | move-adobject -targetpath "OU=Groups,DC=MARVEL,DC=LOCAL" | Out-Null
-  get-adgroup "DnsAdmins" | move-adobject -targetpath "OU=Groups,DC=MARVEL,DC=LOCAL" | Out-Null
-  get-adgroup "DnsUpdateProxy" | move-adobject -targetpath "OU=Groups,DC=MARVEL,DC=LOCAL" | Out-Null
-  get-adgroup "Domain Computers" | move-adobject -targetpath "OU=Groups,DC=MARVEL,DC=LOCAL" | Out-Null
-  get-adgroup "Domain Controllers" | move-adobject -targetpath "OU=Groups,DC=MARVEL,DC=LOCAL" | Out-Null
-  get-adgroup "Domain Guests" | move-adobject -targetpath "OU=Groups,DC=MARVEL,DC=LOCAL" | Out-Null
-  get-adgroup "Domain Users" | move-adobject -targetpath "OU=Groups,DC=MARVEL,DC=LOCAL" | Out-Null
-  get-adgroup "Domain Admins" | move-adobject -targetpath "OU=Groups,DC=MARVEL,DC=LOCAL" | Out-Null
-  get-adgroup "Enterprise Admins" | move-adobject -targetpath "OU=Groups,DC=MARVEL,DC=LOCAL" | Out-Null
-  get-adgroup "Enterprise Key Admins" | move-adobject -targetpath "OU=Groups,DC=MARVEL,DC=LOCAL" | Out-Null
-  get-adgroup "Enterprise Read-only Domain Controllers" | move-adobject -targetpath "OU=Groups,DC=MARVEL,DC=LOCAL" | Out-Null
-  get-adgroup "Group Policy Creator Owners" | move-adobject -targetpath "OU=Groups,DC=MARVEL,DC=LOCAL" | Out-Null
-  get-adgroup "Key Admins" | move-adobject -targetpath "OU=Groups,DC=MARVEL,DC=LOCAL" | Out-Null
-  get-adgroup "Protected Users" | move-adobject -targetpath "OU=Groups,DC=MARVEL,DC=LOCAL" | Out-Null
-  get-adgroup "RAS and IAS Servers" | move-adobject -targetpath "OU=Groups,DC=MARVEL,DC=LOCAL" | Out-Null
-  get-adgroup "Read-only Domain Controllers" | move-adobject -targetpath "OU=Groups,DC=MARVEL,DC=LOCAL" | Out-Null
+  # create ou=groups, move all existing groups into ou=groups,dc=zenithcore,dc=local
+  New-ADOrganizationalUnit -Name "Groups" -Path "DC=ZENITHCORE,DC=LOCAL" -Description "Groups" | Out-Null
+  get-adgroup "Schema Admins" | move-adobject -targetpath "OU=Groups,DC=ZENITHCORE,DC=LOCAL" | Out-Null
+  get-adgroup "Allowed RODC Password Replication Group" | move-adobject -targetpath "OU=Groups,DC=ZENITHCORE,DC=LOCAL" | Out-Null
+  get-adgroup "Cert Publishers" | move-adobject -targetpath "OU=Groups,DC=ZENITHCORE,DC=LOCAL" | Out-Null
+  get-adgroup "Cloneable Domain Controllers" | move-adobject -targetpath "OU=Groups,DC=ZENITHCORE,DC=LOCAL" | Out-Null
+  get-adgroup "Denied RODC Password Replication Group" | move-adobject -targetpath "OU=Groups,DC=ZENITHCORE,DC=LOCAL" | Out-Null
+  get-adgroup "DnsAdmins" | move-adobject -targetpath "OU=Groups,DC=ZENITHCORE,DC=LOCAL" | Out-Null
+  get-adgroup "DnsUpdateProxy" | move-adobject -targetpath "OU=Groups,DC=ZENITHCORE,DC=LOCAL" | Out-Null
+  get-adgroup "Domain Computers" | move-adobject -targetpath "OU=Groups,DC=ZENITHCORE,DC=LOCAL" | Out-Null
+  get-adgroup "Domain Controllers" | move-adobject -targetpath "OU=Groups,DC=ZENITHCORE,DC=LOCAL" | Out-Null
+  get-adgroup "Domain Guests" | move-adobject -targetpath "OU=Groups,DC=ZENITHCORE,DC=LOCAL" | Out-Null
+  get-adgroup "Domain Users" | move-adobject -targetpath "OU=Groups,DC=ZENITHCORE,DC=LOCAL" | Out-Null
+  get-adgroup "Domain Admins" | move-adobject -targetpath "OU=Groups,DC=ZENITHCORE,DC=LOCAL" | Out-Null
+  get-adgroup "Enterprise Admins" | move-adobject -targetpath "OU=Groups,DC=ZENITHCORE,DC=LOCAL" | Out-Null
+  get-adgroup "Enterprise Key Admins" | move-adobject -targetpath "OU=Groups,DC=ZENITHCORE,DC=LOCAL" | Out-Null
+  get-adgroup "Enterprise Read-only Domain Controllers" | move-adobject -targetpath "OU=Groups,DC=ZENITHCORE,DC=LOCAL" | Out-Null
+  get-adgroup "Group Policy Creator Owners" | move-adobject -targetpath "OU=Groups,DC=ZENITHCORE,DC=LOCAL" | Out-Null
+  get-adgroup "Key Admins" | move-adobject -targetpath "OU=Groups,DC=ZENITHCORE,DC=LOCAL" | Out-Null
+  get-adgroup "Protected Users" | move-adobject -targetpath "OU=Groups,DC=ZENITHCORE,DC=LOCAL" | Out-Null
+  get-adgroup "RAS and IAS Servers" | move-adobject -targetpath "OU=Groups,DC=ZENITHCORE,DC=LOCAL" | Out-Null
+  get-adgroup "Read-only Domain Controllers" | move-adobject -targetpath "OU=Groups,DC=ZENITHCORE,DC=LOCAL" | Out-Null
   }
   # ---- end create_labcontent function
 
@@ -534,7 +534,7 @@ function create_marvel_gpo {
 
   # thats all folks!
   write-host("`n  [++] New Disable Defender GPO Created, Linked and Enforced `n")
-  Get-GPO -Name "Disable Defender" | New-GPLink -target "DC=MARVEL,DC=local" -LinkEnabled Yes -Enforced Yes
+  Get-GPO -Name "Disable Defender" | New-GPLink -target "DC=ZENITHCORE,DC=local" -LinkEnabled Yes -Enforced Yes
 
   write-host("`n  [++] Removing and unlinking Default Domain Policy")
   Remove-GPLink -Name "Default Domain Policy" -target "DC=$CurrentDomain,DC=local" | Out-Null 
@@ -654,9 +654,9 @@ function fix_dcdns {
 }
 
 function fix_workstationdns {
-  $DCDNS=(Test-Connection -comp HYDRA-DC -Count 1).ipv4address.ipaddressToString
+  $DCDNS=(Test-Connection -comp ZENITHCORE-DC01 -Count 1).ipv4address.ipaddressToString
   
-  write-host("`n  [++] Found HYDRA-DC At $DCDNS")
+  write-host("`n  [++] Found ZENITHCORE-DC01 At $DCDNS")
   $adapter=Get-CimInstance -Class Win32_NetworkAdapter -Property NetConnectionID,NetConnectionStatus | Where-Object { $_.NetConnectionStatus -eq 2 } | Select-Object -Property NetConnectionID -ExpandProperty NetConnectionID
   
   write-host "`n  [++] Disabling $adapter Power Management"
@@ -676,16 +676,16 @@ function server_build {
   write-host("     Domain Name : $domain")
   write-host("      OS Version : $osversion")
 
-  if($currentname -ne "HYDRA-DC") {
-      write-host("`n  Computer Name is Incorrect Setting HYDRA-DC")
-      write-host("`n  - Script Run 1 of 3 - Setting the computer name to HYDRA-DC and rebooting")
+  if($currentname -ne "ZENITHCORE-DC01") {
+      write-host("`n  Computer Name is Incorrect Setting ZENITHCORE-DC01")
+      write-host("`n  - Script Run 1 of 3 - Setting the computer name to ZENITHCORE-DC01 and rebooting")
       write-host("`n  AFTER The reboot run the script again! to setup the domain controller!")
       Read-Host -Prompt "`n Press ENTER to continue..."
       set_mppref  # one time run of this function on the dc build 
       set_dcstaticip
-      Rename-Computer -NewName "HYDRA-DC" -Restart
+      Rename-Computer -NewName "ZENITHCORE-DC01" -Restart
       }
-      elseif ($domain -ne "MARVEL.LOCAL") {
+      elseif ($domain -ne "ZENITHCORE.LOCAL") {
         write-host("`n  Computer name is CORRECT... Executing BuildLab Function")
         write-host("`n  Script Run 2 of 3 - AFTER The Domain Controller has been setup and configured, the system will auto-reboot")
         write-host("`n  NOTE: This Reboot will take SEVERAL MINUTES, Dont Panic! We are working hard to build your Course Domain-Controller!")
@@ -693,7 +693,7 @@ function server_build {
         Read-Host -Prompt "`n`n Press ENTER to continue..."
         build_lab
         }
-      elseif ($domain -eq "MARVEL.LOCAL" -And $machine -eq "HYDRA-DC") {
+      elseif ($domain -eq "ZENITHCORE.LOCAL" -And $machine -eq "ZENITHCORE-DC01") {
         write-host("`n Computer name and Domain are correct : Executing CreateContent Function ")
         create_labcontent
         create_marvel_gpo
@@ -746,7 +746,7 @@ function setup_git {
 # ---- begin get_recon function 
 function git_recon() { 
   # Put Recon in the right place (could be used on DC or Workstations) 
-  write-host("`n  [++] Downloading Powershell Mafia v1.9 to C:\TCM-Academy")
+  write-host("`n  [++] Downloading Powershell Mafia v1.9 to C:\Zenith-Core")
   mkdir $HOME\Documents\WindowsPowerShell\Modules\Recon
   git clone https://github.com/PowerShellMafia/PowerSploit C:\tcm-academy\PowerShellMafia
   write-host("`n  [++] Copying Recon to C:\$HOME\Documents\WindowsPowerShell\Modules\Recon")
@@ -783,19 +783,19 @@ function workstations_common {
   # requires .net v2 and the powershell -version 2 -ep bypass for this 
   # (course material update for this one)
   mkdir C:\TCM-ACADEMY > $null 
-  write-host("`n  [++] Downloading Powerview v1.9 to C:\TCM-Academy")
-  Invoke-WebRequest  https://raw.githubusercontent.com/PowerShellEmpire/PowerTools/version_1.9/PowerView/powerview.ps1 -o C:\TCM-Academy\Powerview.ps1 | Out-Null
+  write-host("`n  [++] Downloading Powerview v1.9 to C:\Zenith-Core")
+  Invoke-WebRequest  https://raw.githubusercontent.com/PowerShellEmpire/PowerTools/version_1.9/PowerView/powerview.ps1 -o C:\Zenith-Core\Powerview.ps1 | Out-Null
   
   #Git PowershellMafia's Recon and drop it in $HOME\Documents\WindowsPowerShell\Modules\Recon
   # Will work for the DC wont work for the Workstation as its not logged into the domain yet... 
   # git_recon 
 
   # download and unzip pstools.zip to c:\pstools 
-  write-host("`n  [++] Downloading PSTools to C:\TCM-Academy")
-  Invoke-WebRequest  https://download.sysinternals.com/files/PSTools.zip -o C:\TCM-Academy\PStools.zip | Out-Null
+  write-host("`n  [++] Downloading PSTools to C:\Zenith-Core")
+  Invoke-WebRequest  https://download.sysinternals.com/files/PSTools.zip -o C:\Zenith-Core\PStools.zip | Out-Null
   Start-BitsTransfer -Source "https://download.sysinternals.com/files/PSTools.zip" -Destination "C:\TCM-Aacademy\PSTools.zip" | Out-Null
   write-host("`n  [++] Extracting PSTools to C:\PSTools")
-  Expand-Archive -Force C:\TCM-Academy\PSTools.zip C:\PSTools | Out-Null 
+  Expand-Archive -Force C:\Zenith-Core\PSTools.zip C:\PSTools | Out-Null 
   
   # create c:\share and smbshare
   mkdir C:\Share > $null 
@@ -803,12 +803,12 @@ function workstations_common {
 
   fix_workstationdns
 
-  # automatically join domain using tstark
-  write-host("`n Joining machine to domain Marvel.local")
-  # add-computer -domainname "MARVEL.LOCAL" -username administrator -restart | Out-Null
-  $domain = "MARVEL"
+  # automatically join domain using nokafor
+  write-host("`n Joining machine to domain ZenithCore.local")
+  # add-computer -domainname "ZENITHCORE.LOCAL" -username administrator -restart | Out-Null
+  $domain = "ZENITHCORE"
   $password = "Password2019!@#" | ConvertTo-SecureString -asPlainText -Force
-  $username = "$domain\tstark" 
+  $username = "$domain\nokafor" 
   $credential = New-Object System.Management.Automation.PSCredential($username,$password)
   Add-Computer -DomainName $domain -Credential $credential  | Out-Null 
   }
@@ -830,7 +830,7 @@ function workstation_punisher {
     }
     elseif ($machine -eq "PUNISHER") {
       workstations_common
-      Read-Host -Prompt "`n All done! $machine is all setup! `n Press Enter to reboot and Login as MARVEL\fcastle and Password1 "
+      Read-Host -Prompt "`n All done! $machine is all setup! `n Press Enter to reboot and Login as ZENITHCORE\annaji and Password1 "
       restart-computer 
     }
     else { write-host("Nothing to do here") }
@@ -853,9 +853,9 @@ function workstation_spiderman {
     }
     elseif ($machine -eq "SPIDERMAN") {
       workstations_common 
-      #add fcastle as a local administrator on the spiderman machine 
+      #add annaji as a local administrator on the spiderman machine 
       Add-LocalGroupMember -Group Administrators -Member Fcastle -Verbose
-      Read-Host -Prompt "`n All done! $machine is all setup! `n Press Enter to reboot and Login as MARVEL\pparker and Password2 "
+      Read-Host -Prompt "`n All done! $machine is all setup! `n Press Enter to reboot and Login as ZENITHCORE\sibeh and Password2 "
       restart-computer 
       }
     else { write-host("Nothing to do here") }
@@ -868,9 +868,9 @@ function menu {
     Write-Host "`n`n`tTCM-Academy PEH Course AD-Lab Build Menu - Select an option`n"
     Write-Host "`tPress 'D' to setup Hydra-DC Domain Controller"
     Write-host "`t(must be run 3 times)`n"
-    Write-Host "`tPress 'P' to setup Punisher Workstation and join the domain Marvel.local"
+    Write-Host "`tPress 'P' to setup Punisher Workstation and join the domain ZenithCore.local"
     Write-host "`t(must be run 2 times)`n"
-    Write-Host "`tPress 'S' to setup Spiderman Workstation and join the domain Marvel.local" 
+    Write-Host "`tPress 'S' to setup Spiderman Workstation and join the domain ZenithCore.local" 
     Write-host "`t(must be run 2 times)`n"
     Write-host "`n`t --- Independant Standalone Functions ---"
     Write-host "`n`tPress 'N' to only run the NukeDefender Function"
