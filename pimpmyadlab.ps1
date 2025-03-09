@@ -854,7 +854,7 @@ function workstation_spiderman {
     elseif ($machine -eq "SPIDERMAN") {
       workstations_common 
       #add annaji as a local administrator on the spiderman machine 
-      Add-LocalGroupMember -Group Administrators -Member Fcastle -Verbose
+      Add-LocalGroupMember -Group Administrators -Member Annaji -Verbose
       Read-Host -Prompt "`n All done! $machine is all setup! `n Press Enter to reboot and Login as ZENITHCORE\sibeh and Password2 "
       restart-computer 
       }
