@@ -96,8 +96,8 @@ function nukedefender {
   schtasks /Change /TN "Microsoft\Windows\Windows Defender\Windows Defender Verification" /Disable > $null
 
   # disable windows update/automatic update
-  write-host("`n  [++] Nuking Windows Update")
-  reg add "HKLM\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate\AU" /v "NoAutoUpdate" /t REG_DWORD /d "1" /f > $null
+  #write-host("`n  [++] Nuking Windows Update")
+  #reg add "HKLM\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate\AU" /v "NoAutoUpdate" /t REG_DWORD /d "1" /f > $null
 
   # disable remote uac ( should solved the rcp_s_access_denied issue with Impacket may need to include w/ workstations )
   write-host("`n  [++] Nuking UAC and REMOTE UAC")
