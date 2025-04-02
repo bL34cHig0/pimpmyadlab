@@ -1,8 +1,8 @@
 ﻿#Requires -RunAsAdministrator
  
-# TCM-ACADEMY Practical Ethical Hacker Course - Active Directory Lab build script 
-# DomainController (Hydra-DC) and Both Workstation (Punisher & Spiderman)
-# https://academy.tcm-sec.com/p/practical-ethical-hacking-the-complete-course
+# zenith-ACADEMY Practical Ethical Hacker Course - Active Directory Lab build script 
+# DomainController (ZENITHCORE-DC01) and Both Workstation (WS01 & WS02)
+# https://academy.zenith-sec.com/p/practical-ethical-hacking-the-complete-course
 #
 # Scripted By: Dewalt         
 # Revision 2.0.0 - see readme.md for revision notes   
@@ -173,7 +173,7 @@ function fix_setspn {
  setspn -A DomainController/SQLService.$FullDomainName`:60111 $ShortDomainName\SQLService > $null
 
   # check both local and domain spns (add additional if statements here)
-  write-host("`n  [++] Checking Local Hydra-DC SPN")
+  write-host("`n  [++] Checking Local ZENITHCORE-DC01 SPN")
   #setspn -L ZENITHCORE-DC01
   # -- new code 
   setspn -L $machine 
@@ -513,7 +513,7 @@ function create_marvel_gpo {
 
   write-host("`n  [++] Setting GPO Registry key: WindowsUpdate")
   # reg add "HKLM\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate\AU" /v "NoAutoUpdate" /t REG_DWORD /d "1" /f > $null
-  Set-GPRegistryValue -Name "Disable Defender" -Key "HKLM\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate\AU" -ValueName "NoAutoUpdate" -Value 1 -Type Dword | Out-Null
+  # Set-GPRegistryValue -Name "Disable Defender" -Key "HKLM\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate\AU" -ValueName "NoAutoUpdate" -Value 1 -Type Dword | Out-Null
 
   # quality of life improvements gpo-policy pushed 
     # Dark Mode GPO 
@@ -568,8 +568,8 @@ function set_dcstaticip {
   }
   # ---- end set_dcstaticip function  
 
-# ---- begin set_punisher_staticip function  
-function set_punisher_staticip { 
+# ---- begin set_WS01_staticip function  
+function set_WS01_staticip { 
   # get the ip address
   $IPAddress=Get-NetIPAddress -AddressFamily IPv4 -InterfaceIndex $(Get-NetConnectionProfile | Select-Object -ExpandProperty InterfaceIndex) | Select-Object -ExpandProperty IPAddress
   
@@ -593,10 +593,10 @@ function set_punisher_staticip {
   netsh interface ipv4 set address name="$adapter" static $StaticIP $StaticMask $StaticGateway
   netsh interface ipv4 set dnsservers name="$adapter" static 8.8.8.8
   }
-  # ---- end set_punisher_staticip function  
+  # ---- end set_WS01_staticip function  
 
-# ---- begin set_spiderman_staticip function  
-function set_spiderman_staticip { 
+# ---- begin set_ws02_staticip function  
+function set_WS02_staticip { 
   # get the ip address
   $IPAddress=Get-NetIPAddress -AddressFamily IPv4 -InterfaceIndex $(Get-NetConnectionProfile | Select-Object -ExpandProperty InterfaceIndex) | Select-Object -ExpandProperty IPAddress
   
@@ -621,7 +621,7 @@ function set_spiderman_staticip {
   write-host "`n  [++]  Setting $adapter to DNS: 8.8.8.8"
   netsh interface ipv4 set dnsservers name="$adapter" static 8.8.8.8
   }  
-  # ---- end set_spiderman_staticip function
+  # ---- end set_WS02_staticip function
 
 function fix_dcdns {
   $IPAddress=Get-NetIPAddress -AddressFamily IPv4 -InterfaceIndex $(Get-NetConnectionProfile | Select-Object -ExpandProperty InterfaceIndex) | Select-Object -ExpandProperty IPAddress
@@ -748,9 +748,9 @@ function git_recon() {
   # Put Recon in the right place (could be used on DC or Workstations) 
   write-host("`n  [++] Downloading Powershell Mafia v1.9 to C:\Zenith-Core")
   mkdir $HOME\Documents\WindowsPowerShell\Modules\Recon
-  git clone https://github.com/PowerShellMafia/PowerSploit C:\tcm-academy\PowerShellMafia
+  git clone https://github.com/PowerShellMafia/PowerSploit C:\zenith-academy\PowerShellMafia
   write-host("`n  [++] Copying Recon to C:\$HOME\Documents\WindowsPowerShell\Modules\Recon")
-  echo D | xcopy /e /y C:\tcm-academy\PowerShellMafia\Recon $HOME\Documents\WindowsPowerShell\Modules\Recon
+  echo D | xcopy /e /y C:\zenith-academy\PowerShellMafia\Recon $HOME\Documents\WindowsPowerShell\Modules\Recon
   }
   # ---- end git_recon function
 
@@ -782,7 +782,7 @@ function workstations_common {
   # download old version of Powerview so it works with course material 
   # requires .net v2 and the powershell -version 2 -ep bypass for this 
   # (course material update for this one)
-  mkdir C:\TCM-ACADEMY > $null 
+  mkdir C:\zenith-ACADEMY > $null 
   write-host("`n  [++] Downloading Powerview v1.9 to C:\Zenith-Core")
   Invoke-WebRequest  https://raw.githubusercontent.com/PowerShellEmpire/PowerTools/version_1.9/PowerView/powerview.ps1 -o C:\Zenith-Core\Powerview.ps1 | Out-Null
   
@@ -793,7 +793,7 @@ function workstations_common {
   # download and unzip pstools.zip to c:\pstools 
   write-host("`n  [++] Downloading PSTools to C:\Zenith-Core")
   Invoke-WebRequest  https://download.sysinternals.com/files/PSTools.zip -o C:\Zenith-Core\PStools.zip | Out-Null
-  Start-BitsTransfer -Source "https://download.sysinternals.com/files/PSTools.zip" -Destination "C:\TCM-Aacademy\PSTools.zip" | Out-Null
+  Start-BitsTransfer -Source "https://download.sysinternals.com/files/PSTools.zip" -Destination "C:\zenith-Aacademy\PSTools.zip" | Out-Null
   write-host("`n  [++] Extracting PSTools to C:\PSTools")
   Expand-Archive -Force C:\Zenith-Core\PSTools.zip C:\PSTools | Out-Null 
   
@@ -814,63 +814,63 @@ function workstations_common {
   }
   # ---- end workstations_common function      
 
-# ---- begin workstation_punisher function 
-function workstation_punisher { 
+# ---- begin workstation_WS01 function 
+function workstation_WS01 { 
   write-host("`n`n   Computer Name : $machine")
   write-host("     Domain Name : $domain")
   write-host("      OS Version : $osversion")
 
-  if ($machine -ne "PUNISHER") { 
-    write-host ("`n Setting the name of this machine to PUNISHER and rebooting automatically...")
+  if ($machine -ne "WS01") { 
+    write-host ("`n Setting the name of this machine to WS01 and rebooting automatically...")
     write-host (" Run this script 1 more time and select 'P' in the menu to join the domain")
     Read-Host -Prompt "`n Press ENTER to continue..."
     # set_mppref
-    set_punisher_staticip 
-    Rename-Computer -NewName "PUNISHER" -Restart
+    set_WS01_staticip 
+    Rename-Computer -NewName "WS01" -Restart
     }
-    elseif ($machine -eq "PUNISHER") {
+    elseif ($machine -eq "WS01") {
       workstations_common
       Read-Host -Prompt "`n All done! $machine is all setup! `n Press Enter to reboot and Login as ZENITHCORE\annaji and Password1 "
       restart-computer 
     }
     else { write-host("Nothing to do here") }
     } 
-    # ---- end workstation_punisher function 
+    # ---- end workstation_WS01 function 
     
-# ---- begin workstation_spiderman function
-function workstation_spiderman { 
+# ---- begin workstation_WS02 function
+function workstation_WS02 { 
   write-host("`n`n   Computer Name : $machine")
   write-host("     Domain Name : $domain")
   write-host("      OS Version : $osversion")
   
-  if ($machine -ne "SPIDERMAN") {
-    write-host ("`n Setting the name of this machine to SPIDERMAN and rebooting automatically...")
+  if ($machine -ne "WS02") {
+    write-host ("`n Setting the name of this machine to WS02 and rebooting automatically...")
     write-host (" Run this script 1 more time and select 'S' in the menu to join the domain")
     Read-Host -Prompt "`n Press ENTER to continue..."
     set_mppref
-    set_spiderman_staticip
-    Rename-Computer -NewName "SPIDERMAN" -Restart
+    set_WS02_staticip
+    Rename-Computer -NewName "WS02" -Restart
     }
-    elseif ($machine -eq "SPIDERMAN") {
+    elseif ($machine -eq "WS02") {
       workstations_common 
-      #add annaji as a local administrator on the spiderman machine 
+      #add annaji as a local administrator on the WS02 machine 
       Add-LocalGroupMember -Group Administrators -Member Annaji -Verbose
       Read-Host -Prompt "`n All done! $machine is all setup! `n Press Enter to reboot and Login as ZENITHCORE\sibeh and Password2 "
       restart-computer 
       }
     else { write-host("Nothing to do here") }
     } 
-    # ---- end workstation_spiderman function
+    # ---- end workstation_WS02 function
 
 # ---- begin menu function
 function menu {
   do {
-    Write-Host "`n`n`tTCM-Academy PEH Course AD-Lab Build Menu - Select an option`n"
-    Write-Host "`tPress 'D' to setup Hydra-DC Domain Controller"
+    Write-Host "`n`n`tzenith-Academy PEH Course AD-Lab Build Menu - Select an option`n"
+    Write-Host "`tPress 'D' to setup ZENITHCORE-DC01 Domain Controller"
     Write-host "`t(must be run 3 times)`n"
-    Write-Host "`tPress 'P' to setup Punisher Workstation and join the domain ZenithCore.local"
+    Write-Host "`tPress 'P' to setup WS01 Workstation and join the domain ZenithCore.local"
     Write-host "`t(must be run 2 times)`n"
-    Write-Host "`tPress 'S' to setup Spiderman Workstation and join the domain ZenithCore.local" 
+    Write-Host "`tPress 'S' to setup WS02 Workstation and join the domain ZenithCore.local" 
     Write-host "`t(must be run 2 times)`n"
     Write-host "`n`t --- Independant Standalone Functions ---"
     Write-host "`n`tPress 'N' to only run the NukeDefender Function"
@@ -882,15 +882,15 @@ function menu {
     until (($choice -eq 'P') -or ($choice -eq 'D') -or ($choice -eq 'S') -or ($choice -eq 'N') -or ($choice -eq 'F') -or ($choice -eq 'X') -or ($choice -eq 'K') -or ($choice -eq 'A'))
     
   switch ($choice) {
-    'D'{  Write-Host "`n Running... Hydra-DC domain controller"
+    'D'{  Write-Host "`n Running... ZENITHCORE-DC01 domain controller"
           nukedefender 
           server_build }
-    'P'{  Write-Host "`n Running... Punisher Workstation"
+    'P'{  Write-Host "`n Running... WS01 Workstation"
           nukedefender 
-          workstation_punisher }
-    'S'{  Write-Host "`n Running... Spiderman Workstation"
+          workstation_WS01 }
+    'S'{  Write-Host "`n Running... WS02 Workstation"
           nukedefender 
-          workstation_spiderman }
+          workstation_WS02 }
     'F'{  Write-Host "`n ONLY Running... Fix My Disable Defender GPO function and exit" 
           create_marvel_gpo }          
     'N'{  Write-Host "`n ONLY Running... the NukeDefender function and exit"
